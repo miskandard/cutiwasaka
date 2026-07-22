@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Cuti</title>
 
     <link rel="icon" type="image/png" href="{{ asset('img/logo/wg.png') }}">
@@ -165,11 +166,248 @@ body.sidebar-closed .menu-title {
     flex-direction: column;
 }
 
+        .table-box {
+            overflow-x: auto;
+        }
+
+        /* RESPONSIVE DESIGN */
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mobile-toggle-btn {
+            display: none;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border: 1px solid #dfe3f0;
+                border-radius: 8px;
+                background: #f8f9fc;
+                color: #1e2a78;
+                cursor: pointer;
+                font-size: 18px;
+                transition: all 0.3s ease;
+            }
+
+            body.dark-mode .mobile-toggle-btn {
+                background: #1f2937;
+                border-color: #374151;
+                color: #ffffff;
+            }
+
+            .sidebar {
+                left: 0;
+                z-index: 1000;
+                transform: translateX(0);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+            }
+            
+            body.sidebar-closed .sidebar {
+                transform: translateX(-100%);
+            }
+
+            body:not(.sidebar-closed) .sidebar-overlay {
+                display: block;
+                opacity: 1;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 15px !important;
+            }
+
+            body.sidebar-closed .main-content {
+                margin-left: 0 !important;
+            }
+
+            .topbar {
+                padding: 15px !important;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .topbar h1 {
+                font-size: 20px !important;
+            }
+
+            .user-box span {
+                display: none; /* Hide user name text on small screen */
+            }
+
+            .user-box {
+                gap: 8px !important;
+            }
+
+            .table-box {
+                margin-top: 15px !important;
+                padding: 15px !important;
+                overflow-x: visible !important; /* Allow layout grid overflow card styles on mobile */
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 12px;
+            }
+
+            .table-header h3 {
+                margin: 0;
+            }
+
+            .filter-box {
+                width: 100%;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+
+            .filter-box input, .filter-box select {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            /* Responsive Table (Cards Layout) */
+            #dataCutiTable {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+            }
+
+            #dataCutiTable thead {
+                display: none !important; /* Hide headers */
+            }
+
+            #dataCutiTable tbody {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            #dataCutiTable tbody tr {
+                display: block;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 10px 15px !important;
+                margin-bottom: 15px !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+                box-sizing: border-box !important;
+                transition: transform 0.2s ease !important;
+            }
+
+            body.dark-mode #dataCutiTable tbody tr {
+                background: #111827 !important;
+                border-color: #374151 !important;
+            }
+
+            #dataCutiTable tbody td {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 10px 0 !important;
+                border-bottom: 1px dashed #e2e8f0 !important;
+                text-align: right !important;
+                font-size: 14px !important;
+                box-sizing: border-box !important;
+                background: transparent !important;
+            }
+
+            body.dark-mode #dataCutiTable tbody td {
+                border-bottom-color: #374151 !important;
+                background: transparent !important;
+                color: #ffffff !important;
+            }
+
+            #dataCutiTable tbody td:last-child {
+                border-bottom: none !important;
+            }
+
+            #dataCutiTable tbody td::before {
+                content: attr(data-label) !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+                text-align: left !important;
+                margin-right: 15px !important;
+                display: inline-block !important;
+            }
+
+            body.dark-mode #dataCutiTable tbody td::before {
+                color: #94a3b8 !important;
+            }
+
+            /* Make empty table responsive */
+            #dataCutiTable tbody tr td[colspan="10"] {
+                display: block !important;
+                text-align: center !important;
+                border: none !important;
+                padding: 20px 0 !important;
+            }
+
+            #dataCutiTable tbody tr td[colspan="10"]::before {
+                display: none !important;
+            }
+
+            /* Align detail button and status badge correctly inside flex row */
+            .btn-detail {
+                margin: 0 !important;
+                padding: 6px 12px !important;
+                font-size: 13px !important;
+                display: inline-block !important;
+            }
+
+            .status {
+                margin: 0 !important;
+                padding: 4px 12px !important;
+                font-size: 12px !important;
+                min-width: 80px !important;
+                display: inline-block !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            .modal-box {
+                padding: 15px 20px !important;
+                width: 95% !important;
+            }
+            .modal-box h2 {
+                font-size: 18px;
+            }
+            .logout-box {
+                width: 90% !important;
+                padding: 20px !important;
+            }
+        }
     </style>
 </head>
 </head>
 
 <body>
+
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar">
 
@@ -220,6 +458,15 @@ body.sidebar-closed .menu-title {
         </a>
     </div>
 
+    <!-- SECTION 4 -->
+    <div class="menu-section">
+        <p class="menu-title">PENGATURAN</p>
+
+        <a href="/pengaturan-cuti">
+            <i class="fa-solid fa-gear"></i> Pengaturan Cuti
+        </a>
+    </div>
+
     <a href="javascript:void(0)" class="logout" onclick="showLogoutModal(event)">
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
     </a>
@@ -229,7 +476,12 @@ body.sidebar-closed .menu-title {
     <div class="main-content">
 
         <div class="topbar">
-            <h1>Data Cuti</h1>
+            <div class="topbar-left">
+                <button type="button" class="mobile-toggle-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1>Data Cuti</h1>
+            </div>
 
             <div class="user-box">
 
@@ -287,16 +539,16 @@ body.sidebar-closed .menu-title {
                 <tbody>
                     @forelse($dataCuti as $cuti)
                     <tr data-tahun="{{ date('Y', strtotime($cuti->tanggal_pengajuan)) }}">
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $cuti->nama }}</td>
-                        <td>{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
-                        <td>{{ $cuti->divisi ?? '-' }}</td>
-                        <td>{{ $cuti->tanggal_pengajuan }}</td>
-                        <td>{{ $cuti->tanggal_mulai }}</td>
-                        <td>{{ $cuti->tanggal_selesai }}</td>
-                        <td>{{ $cuti->jumlah_hari }}</td>
+                        <td data-label="No">{{ $loop->iteration }}</td>
+                        <td data-label="Nama">{{ $cuti->nama }}</td>
+                        <td data-label="Jenis Cuti">{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
+                        <td data-label="Divisi">{{ $cuti->divisi ?? '-' }}</td>
+                        <td data-label="Tgl Pengajuan">{{ $cuti->tanggal_pengajuan }}</td>
+                        <td data-label="Tgl Mulai">{{ $cuti->tanggal_mulai }}</td>
+                        <td data-label="Tgl Selesai">{{ $cuti->tanggal_selesai }}</td>
+                        <td data-label="Jumlah Hari">{{ $cuti->jumlah_hari }} hari</td>
 
-                        <td>
+                        <td data-label="Status">
                             @php
                             if ($cuti->status_hrd == 'disetujui' && $cuti->status_direktur == 'menunggu') {
                             $statusTampil = 'disetujui';
@@ -310,7 +562,7 @@ body.sidebar-closed .menu-title {
                             </span>
                         </td>
 
-                        <td>
+                        <td data-label="Aksi">
                           <button type="button" class="btn-detail"
                             onclick="showDetail(
                             '{{ $cuti->nama }}',
@@ -395,7 +647,7 @@ body.sidebar-closed .menu-title {
             <div class="detail-item" id="box_alasan_hrd">
     <span style="color:red;">Alasan Ditolak HRD</span>
     <strong id="d_alasan_hrd" style="color:red;">-</strong>
-</div>
+    </div>
 
             <button class="btn-close" onclick="closeDetail()">
                 Tutup
@@ -463,7 +715,7 @@ body.sidebar-closed .menu-title {
         searchInput.addEventListener('keyup', filterTable);
         filterPeriode.addEventListener('change', filterTable);
 
-       function showDetail(nama, jenis, divisi, pengajuan, mulai, selesai, jumlah, status, alasan, alasanDitolak) {
+    function showDetail(nama, jenis, divisi, pengajuan, mulai, selesai, jumlah, status, alasan, alasanDitolak) {
     document.getElementById("d_nama").innerText = nama;
     document.getElementById("d_jenis").innerText = jenis;
     document.getElementById("d_divisi").innerText = divisi;
@@ -502,7 +754,9 @@ body.sidebar-closed .menu-title {
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            if (localStorage.getItem("sidebar") === "closed") {
+            if (window.innerWidth <= 768) {
+                document.body.classList.add("sidebar-closed");
+            } else if (localStorage.getItem("sidebar") === "closed") {
                 document.body.classList.add("sidebar-closed");
             }
         });

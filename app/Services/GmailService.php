@@ -83,8 +83,8 @@ class GmailService
                     "To: {$to}\r\n" .
                     "Subject: {$subject}\r\n" .
                     "MIME-Version: 1.0\r\n" .
-                    "Content-Type: text/plain; charset=UTF-8\r\n\r\n" .
-                    $body;
+                    "Content-Type: text/html; charset=UTF-8\r\n\r\n" .
+                    "<div style=\"font-family: sans-serif; white-space: pre-line; line-height: 1.6;\">" . $body . "</div>";
             }
 
             /*
@@ -118,9 +118,9 @@ class GmailService
                 // BODY EMAIL
                 $rawMessage .=
                     "--{$boundary}\r\n" .
-                    "Content-Type: text/plain; charset=UTF-8\r\n" .
+                    "Content-Type: text/html; charset=UTF-8\r\n" .
                     "Content-Transfer-Encoding: 7bit\r\n\r\n" .
-                    $body . "\r\n\r\n";
+                    "<div style=\"font-family: sans-serif; white-space: pre-line; line-height: 1.6;\">" . $body . "</div>\r\n\r\n";
 
                 // ATTACHMENT
                 $rawMessage .=

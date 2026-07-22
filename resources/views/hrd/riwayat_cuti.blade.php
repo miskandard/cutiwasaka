@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Cuti HRD</title>
 
     <link rel="icon" type="image/png" href="{{ asset('img/logo/wg.png') }}">
@@ -479,10 +480,269 @@ body.sidebar-closed .menu-title {
     border-radius:999px;
     font-weight:600;
 }
+
+        .table-box {
+            overflow-x: auto;
+        }
+
+        /* RESPONSIVE DESIGN */
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mobile-toggle-btn {
+            display: none;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border: 1px solid #dfe3f0;
+                border-radius: 8px;
+                background: #f8f9fc;
+                color: #1e2a78;
+                cursor: pointer;
+                font-size: 18px;
+                transition: all 0.3s ease;
+            }
+
+            body.dark-mode .mobile-toggle-btn {
+                background: #1f2937;
+                border-color: #374151;
+                color: #ffffff;
+            }
+
+            .sidebar {
+                left: 0;
+                z-index: 1000;
+                transform: translateX(0);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease;
+            }
+            
+            body.sidebar-closed .sidebar {
+                transform: translateX(-100%);
+            }
+
+            body:not(.sidebar-closed) .sidebar-overlay {
+                display: block;
+                opacity: 1;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 15px !important;
+            }
+
+            body.sidebar-closed .main-content {
+                margin-left: 0 !important;
+            }
+
+            .topbar {
+                padding: 15px !important;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .topbar h1 {
+                font-size: 20px !important;
+            }
+
+            .user-box span {
+                display: none !important; /* Hide user name text on small screen */
+            }
+
+            .user-box {
+                gap: 8px !important;
+            }
+
+            .welcome-bar {
+                margin: 10px 0 !important;
+                padding: 10px 15px !important;
+                font-size: 14px !important;
+            }
+
+            .table-box {
+                margin-top: 15px !important;
+                padding: 15px !important;
+                overflow-x: visible !important;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 12px;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            /* Responsive Table (Cards Layout) */
+            #riwayatTable {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+            }
+
+            #riwayatTable thead {
+                display: none !important; /* Hide headers */
+            }
+
+            #riwayatTable tbody {
+                display: block !important;
+                width: 100% !important;
+            }
+
+            #riwayatTable tbody tr {
+                display: block;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 10px 15px !important;
+                margin-bottom: 15px !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+                box-sizing: border-box !important;
+                transition: transform 0.2s ease !important;
+            }
+
+            body.dark-mode #riwayatTable tbody tr {
+                background: #111827 !important;
+                border-color: #374151 !important;
+            }
+
+            #riwayatTable tbody td {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 10px 0 !important;
+                border-bottom: 1px dashed #e2e8f0 !important;
+                text-align: right !important;
+                font-size: 14px !important;
+                box-sizing: border-box !important;
+                background: transparent !important;
+            }
+
+            body.dark-mode #riwayatTable tbody td {
+                border-bottom-color: #374151 !important;
+                background: transparent !important;
+                color: #ffffff !important;
+            }
+
+            #riwayatTable tbody td:last-child {
+                border-bottom: none !important;
+            }
+
+            #riwayatTable tbody td::before {
+                content: attr(data-label) !important;
+                font-weight: 600 !important;
+                color: #64748b !important;
+                text-align: left !important;
+                margin-right: 15px !important;
+                display: inline-block !important;
+            }
+
+            body.dark-mode #riwayatTable tbody td::before {
+                color: #94a3b8 !important;
+            }
+
+            /* Empty table formatting */
+            #riwayatTable tbody tr td[colspan="9"] {
+                display: block !important;
+                text-align: center !important;
+                border: none !important;
+                padding: 20px 0 !important;
+            }
+
+            #riwayatTable tbody tr td[colspan="9"]::before {
+                display: none !important;
+            }
+
+            .btn-detail {
+                margin: 0 !important;
+                padding: 6px 12px !important;
+                font-size: 13px !important;
+                display: inline-block !important;
+            }
+
+            .badge {
+                margin: 0 !important;
+                padding: 6px 12px !important;
+                font-size: 12px !important;
+            }
+
+            /* Detail Modal responsive form grid */
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+
+            .detail-grid .full {
+                grid-column: span 1 !important;
+            }
+
+            .modal-box {
+                padding: 20px 25px !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            /* Timeline scaling for mobile screens */
+            .timeline-wrapper {
+                margin: 15px 0 25px !important;
+                gap: 2px !important;
+            }
+            .timeline-step {
+                min-width: 50px !important;
+                font-size: 11px !important;
+            }
+            .circle {
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 13px !important;
+                line-height: 32px !important;
+                margin-bottom: 4px !important;
+            }
+            .timeline-line {
+                width: 35px !important;
+                margin-bottom: 20px !important;
+            }
+            .logout-box {
+                width: 90% !important;
+                padding: 20px !important;
+            }
+        }
     </style>
 </head>
 
 <body>
+
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <div class="sidebar">
 
@@ -533,6 +793,15 @@ body.sidebar-closed .menu-title {
         </a>
     </div>
 
+    <!-- SECTION 4 -->
+    <div class="menu-section">
+        <p class="menu-title">PENGATURAN</p>
+
+        <a href="/pengaturan-cuti">
+            <i class="fa-solid fa-gear"></i> Pengaturan Cuti
+        </a>
+    </div>
+
     <a href="javascript:void(0)" class="logout" onclick="showLogoutModal(event)">
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
     </a>
@@ -541,8 +810,13 @@ body.sidebar-closed .menu-title {
 
 <div class="main-content">
 
-    <div div class="topbar d-flex justify-content-between align-items-center">
-    <h1 class="fw-bold text-primary-emphasis">Riwayat Cuti</h1>
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <div class="topbar-left">
+            <button type="button" class="mobile-toggle-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <h1 class="fw-bold text-primary-emphasis m-0">Riwayat Cuti</h1>
+        </div>
 
 
         <div class="user-box d-flex align-items-center gap-3">
@@ -561,10 +835,7 @@ body.sidebar-closed .menu-title {
         </div>
     </div>
 
-    <div class="welcome-bar">
-        <span>Selamat Datang, {{ session('nama') }}</span>
-        <i class="fa-solid fa-xmark"></i>
-    </div>
+    
 
     <div class="table-box">
         <div class="table-header">
@@ -598,15 +869,15 @@ body.sidebar-closed .menu-title {
             <tbody>
                 @forelse($riwayatCuti as $cuti)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
-                        <td>{{ $cuti->tanggal_pengajuan }}</td>
-                        <td>{{ $cuti->tanggal_mulai }}</td>
-                        <td>{{ $cuti->tanggal_selesai }}</td>
-                        <td>{{ $cuti->jumlah_hari }}</td>
-                        <td>{{ $cuti->alasan_pengajuan }}</td>
+                        <td data-label="No">{{ $loop->iteration }}</td>
+                        <td data-label="Jenis Cuti">{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
+                        <td data-label="Tgl Pengajuan">{{ $cuti->tanggal_pengajuan }}</td>
+                        <td data-label="Tgl Mulai">{{ $cuti->tanggal_mulai }}</td>
+                        <td data-label="Tgl Selesai">{{ $cuti->tanggal_selesai }}</td>
+                        <td data-label="Jumlah Hari">{{ $cuti->jumlah_hari }} hari</td>
+                        <td data-label="Keterangan">{{ $cuti->alasan_pengajuan }}</td>
 
-                        <td>
+                        <td data-label="Status">
     @if($cuti->status_pengajuan == 'menunggu')
     <span class="badge bg-warning text-dark">Menunggu</span>
 
@@ -621,7 +892,7 @@ body.sidebar-closed .menu-title {
 @endif
 </td>
 
-                        <td>
+                        <td data-label="Aksi">
                             <button
                                 type="button"
                                 class="btn-detail"
@@ -785,7 +1056,9 @@ function initTheme() {
 }
 
 function initSidebar() {
-    if (localStorage.getItem("sidebar") === "closed") {
+    if (window.innerWidth <= 768) {
+        document.body.classList.add("sidebar-closed");
+    } else if (localStorage.getItem("sidebar") === "closed") {
         document.body.classList.add("sidebar-closed");
     }
 }

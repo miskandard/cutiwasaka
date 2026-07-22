@@ -8,9 +8,9 @@ use App\Services\GmailService;
 
 class DirekturController extends Controller
 {
-    // =========================
-    // AUTH SAFE CHECK
-    // =========================
+    /* ===============================================
+        AUTENTIKASI DIREKTUR
+    =============================================== */
     private function authCheck()
     {
         return session()->has('id_user')
@@ -18,9 +18,9 @@ class DirekturController extends Controller
     }
 
     
-    // =========================
-    // DASHBOARD
-    // =========================
+/* =========================================================
+    MENAMPILKAN DASHBOARD DIREKTUR
+========================================================= */
     public function dashboard()
     {
         if (!$this->authCheck()) {
@@ -31,36 +31,36 @@ class DirekturController extends Controller
             ->where('jabatan', 'karyawan')
             ->count();
 
-        $totalPengajuan = DB::table('pengajuan_cuti')->count();
+        $totalPengajuan = DB::table('cuti')->count();
 
-        $pending = DB::table('pengajuan_cuti')
+        $pending = DB::table('cuti')
             ->where('status_pengajuan', 'diproses')
             ->where('status_hrd', 'disetujui')
             ->where('status_direktur', 'menunggu')
             ->count();
 
-        $disetujui = DB::table('pengajuan_cuti')
+        $disetujui = DB::table('cuti')
             ->where('status_pengajuan', 'disetujui')
             ->count();
 
-              // 🔥 INI YANG KAMU LUPA
-    $ditolak = DB::table('pengajuan_cuti')
+              //  INI YANG KAMU LUPA
+    $ditolak = DB::table('cuti')
         ->where('status_direktur', 'ditolak')
         ->count();
 
-        $menungguVerifikasi = DB::table('pengajuan_cuti')
+        $menungguVerifikasi = DB::table('cuti')
     ->where('status_hrd', 'disetujui')
     ->where('status_direktur', 'menunggu')
     ->count();
 
-$diproses = DB::table('pengajuan_cuti')
+$diproses = DB::table('cuti')
     ->where('status_pengajuan', 'diproses')
     ->where('status_hrd', 'disetujui')
     ->where('status_direktur', 'menunggu')
     ->count();
 
         $pengajuan = $this->queryPengajuanDirektur()
-            ->where('pengajuan_cuti.status_direktur', 'menunggu')
+            ->where('cuti.status_direktur', 'menunggu')
             ->get();
 
         return view('direktur.dashboard', compact(
@@ -74,9 +74,9 @@ $diproses = DB::table('pengajuan_cuti')
 ));
     }
 
-    // =========================
-    // VERIFIKASI PAGE
-    // =========================
+    /* ===============================================
+        MENAMPILKAN HALAMAN VERIFIKASI CUTI
+    =============================================== */
     public function verifikasiCuti()
     {
         if (!$this->authCheck()) {
@@ -91,29 +91,29 @@ $diproses = DB::table('pengajuan_cuti')
         ));
     }
 
-    // =========================
-    // QUERY
-    // =========================
+      /* ===============================================
+        QUERY DATA PENGAJUAN CUTI
+    =============================================== */
    private function queryPengajuanDirektur()
 {
-    return DB::table('pengajuan_cuti')
-        ->join('users', 'pengajuan_cuti.id_user', '=', 'users.id_user')
-        ->leftJoin('jenis_cuti', 'pengajuan_cuti.id_jenis_cuti', '=', 'jenis_cuti.id_jenis_cuti')
+    return DB::table('cuti')
+        ->join('users', 'cuti.id_user', '=', 'users.id_user')
+        ->leftJoin('jenis_cuti', 'cuti.id_jenis_cuti', '=', 'jenis_cuti.id_jenis_cuti')
         ->select(
-            'pengajuan_cuti.*',
+            'cuti.*',
             'users.nama',
             'users.email',
             'users.divisi',
             'users.sisa_cuti',
             'jenis_cuti.nama_jenis_cuti'
         )
-        ->where('pengajuan_cuti.status_hrd', 'disetujui')
-        ->where('pengajuan_cuti.status_direktur', 'menunggu') // 
-        ->orderBy('pengajuan_cuti.created_at', 'desc');
+        ->where('cuti.status_hrd', 'disetujui')
+        ->where('cuti.status_direktur', 'menunggu') // 
+        ->orderBy('cuti.created_at', 'desc');
 }
-    // =========================
-    // UPDATE STATUS
-    // =========================
+      /* ===============================================
+        MEMPROSES VERIFIKASI CUTI
+    =============================================== */
   public function updateVerifikasiCuti(Request $request, $id)
 {
     if (!$this->authCheck()) {
@@ -131,12 +131,12 @@ $diproses = DB::table('pengajuan_cuti')
     return redirect('/verifikasi-cuti-direktur')
         ->with('error', 'Status tidak valid');
 }
-    // =========================
-    // APPROVE + GMAIL (AMAN)
-    // =========================
+      /* ===============================================
+        MENYETUJUI PENGAJUAN CUTI
+    =============================================== */
    public function approveDirektur($id, $redirect = '/dashboard-direktur')
 {
-    $cuti = DB::table('pengajuan_cuti')
+    $cuti = DB::table('cuti')
         ->where('id_pengajuan', $id)
         ->first();
 
@@ -147,7 +147,7 @@ $diproses = DB::table('pengajuan_cuti')
     $user = DB::table('users')->where('id_user', $cuti->id_user)->first();
     $jenisCuti = DB::table('jenis_cuti')->where('id_jenis_cuti', $cuti->id_jenis_cuti)->first();
 
-    DB::table('pengajuan_cuti')
+    DB::table('cuti')
         ->where('id_pengajuan', $id)
         ->update([
             'status_direktur' => 'disetujui',
@@ -161,13 +161,16 @@ $diproses = DB::table('pengajuan_cuti')
     ========================= */
     if ($user) {
 
-        $isSakit = $jenisCuti
-            ? strtolower(trim($jenisCuti->nama_jenis_cuti)) === 'cuti sakit'
-            : false;
+       $isSakit = $jenisCuti
+    ? str_contains(
+        strtolower($jenisCuti->nama_jenis_cuti),
+        'sakit'
+    )
+    : false;
 
         $adaMC = !empty($cuti->dokumen_pendukung);
 
-        // 🔥 HANYA POTONG JIKA BUKAN (SAKIT + ADA MC)
+        // HANYA POTONG JIKA BUKAN (SAKIT + ADA MC)
         if (!($isSakit && $adaMC)) {
 
             $sisaBaru = max(0, $user->sisa_cuti - $cuti->jumlah_hari);
@@ -218,7 +221,6 @@ Terima kasih atas kerja sama dan kontribusi Anda kepada perusahaan.
 
 Hormat kami,
 
-HR Department
 PT Wasaka Group";
 
     GmailService::send(
@@ -230,12 +232,12 @@ PT Wasaka Group";
 
 return redirect($redirect)->with('success', 'Cuti disetujui Direktur');
 }
-    // =========================
-    // TOLAK + GMAIL (AMAN)
-    // =========================
+  /* ===============================================
+        MENOLAK PENGAJUAN CUTI
+    =============================================== */
    public function tolakDirektur(Request $request, $id, $redirect = '/dashboard-direktur')
 {
-    $cuti = DB::table('pengajuan_cuti')
+    $cuti = DB::table('cuti')
         ->where('id_pengajuan', $id)
         ->first();
 
@@ -244,7 +246,7 @@ return redirect($redirect)->with('success', 'Cuti disetujui Direktur');
             ->with('error', 'Data tidak ditemukan');
     }
 
-    DB::table('pengajuan_cuti')
+    DB::table('cuti')
         ->where('id_pengajuan', $id)
         ->update([
             'status_direktur'  => 'ditolak',
@@ -287,24 +289,26 @@ PT Wasaka Group"
         ->with('success', 'Cuti ditolak Direktur');
 }
 
-
+ /* ===============================================
+        MENAMPILKAN DATA CUTI
+    =============================================== */
 public function dataCuti()
 {
     if (!$this->authCheck()) {
         return redirect('/login');
     }
 
-    $dataCuti = DB::table('pengajuan_cuti')
-        ->join('users', 'pengajuan_cuti.id_user', '=', 'users.id_user')
-        ->leftJoin('jenis_cuti', 'pengajuan_cuti.id_jenis_cuti', '=', 'jenis_cuti.id_jenis_cuti')
+    $dataCuti = DB::table('cuti')
+        ->join('users', 'cuti.id_user', '=', 'users.id_user')
+        ->leftJoin('jenis_cuti', 'cuti.id_jenis_cuti', '=', 'jenis_cuti.id_jenis_cuti')
         ->select(
-            'pengajuan_cuti.*',
+            'cuti.*',
             'users.nama',
             'users.divisi',
             'jenis_cuti.nama_jenis_cuti'
         )
-        ->whereIn('pengajuan_cuti.status_direktur', ['disetujui', 'ditolak']) // 🔥 TAMBAHAN INI
-        ->orderBy('pengajuan_cuti.created_at', 'desc')
+        ->whereIn('cuti.status_direktur', ['disetujui', 'ditolak']) // TAMBAHAN INI
+        ->orderBy('cuti.created_at', 'desc')
         ->get();
 
     return view('direktur.data_cuti', compact('dataCuti'));

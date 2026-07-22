@@ -107,7 +107,8 @@
         }
 
         .logout-box{
-            width:420px;
+            width: 90%;
+            max-width: 420px;
             background:white;
             border-radius:16px;
             padding:35px;
@@ -159,15 +160,23 @@
     </a>
 </div>
 
+<!-- Sidebar Overlay for mobile -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <div class="main-content min-h-screen p-6">
 
-    <div class="top-card bg-white rounded-xl shadow-sm px-8 py-6 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-[#0d1f6b]">
-            Input Cuti
-        </h1>
+    <div class="top-card bg-white rounded-xl shadow-sm px-4 md:px-8 py-6 flex justify-between items-center">
+        <div class="flex items-center gap-3 md:gap-4">
+            <button type="button" class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <h1 class="text-xl md:text-3xl font-bold text-[#0d1f6b] leading-tight">
+                Input Cuti
+            </h1>
+        </div>
 
         <div class="flex items-center gap-4">
-            <div class="theme-toggle-top">
+            <div class="theme-toggle-top scale-90 sm:scale-100">
                 <button type="button" id="lightBtn" onclick="setLightMode()">
                     <i class="fa-solid fa-sun"></i>
                 </button>
@@ -177,19 +186,24 @@
                 </button>
             </div>
 
-            <span class="font-semibold">{{ session('nama') }}</span>
+            <span class="font-semibold hidden sm:inline-block">{{ session('nama') }}</span>
             <i class="fa-solid fa-user"></i>
         </div>
     </div>
 
-    <div class="form-card bg-white rounded-2xl shadow-md mt-8 p-8">
+    <div class="form-card bg-white rounded-2xl shadow-md mt-8 p-6 sm:p-8">
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-[#0d1f6b]">
                 Form Pengajuan Cuti
             </h2>
             <p class="text-gray-500 mt-1">
-                Silakan lengkapi data pengajuan cuti dengan benar.
-            </p>
+    Silakan lengkapi data pengajuan cuti dengan benar.
+</p>
+
+<div class="mt-4 bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-xl">
+    <i class="fa-solid fa-calendar-days mr-2"></i>
+    <span id="infoCuti"></span>
+</div>
         </div>
 
         <form action="/input-cuti/store" method="POST" enctype="multipart/form-data" onsubmit="return validateCuti()">
@@ -223,7 +237,7 @@
 
                 <div>
                     <label class="block font-semibold text-gray-700 mb-2">Jenis Cuti</label>
-                    <select name="id_jenis_cuti" id="id_jenis_cuti" onchange="hitungCuti()" required
+                    <select name="id_jenis_cuti" id="id_jenis_cuti" onchange="resetInputsAndHitung()" required
                         class="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white focus:ring-2 focus:ring-blue-400 outline-none">
                         <option value="" selected disabled>Pilih Jenis Cuti</option>
 
@@ -284,9 +298,9 @@
 
             </div>
 
-            <div class="mt-8 flex justify-end gap-3">
+            <div class="mt-8 flex flex-col sm:flex-row justify-end gap-3">
                 <button type="button" onclick="history.back()"
-                    class="px-6 py-3 rounded-xl bg-gray-400 text-white font-bold hover:bg-gray-500 transition">
+                    class="px-6 py-3 rounded-xl bg-gray-400 text-white font-bold hover:bg-gray-500 transition w-full sm:w-auto text-center">
                     Tutup
                 </button>
 
@@ -295,7 +309,7 @@
 <button
     type="button"
     onclick="alertCutiBelumAcc()"
-    class="px-6 py-3 rounded-xl bg-[#1e2a78] text-white font-bold hover:bg-blue-900 transition shadow-md">
+    class="px-6 py-3 rounded-xl bg-[#1e2a78] text-white font-bold hover:bg-blue-900 transition shadow-md w-full sm:w-auto text-center">
 
     Simpan Data
 
@@ -305,7 +319,7 @@
 
 <button
     type="submit"
-   class="px-6 py-3 rounded-xl bg-[#1e2a78] text-white font-bold hover:bg-blue-900 transition shadow-md">
+   class="px-6 py-3 rounded-xl bg-[#1e2a78] text-white font-bold hover:bg-blue-900 transition shadow-md w-full sm:w-auto text-center">
 
     Simpan Data
 
@@ -345,14 +359,33 @@
     </div>
 </div>
 
-@if($cutiBelumAcc)
+
+@if(session('error'))
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    Swal.fire({
+    icon: 'warning',
+    title: 'Pengajuan Cuti Ditolak',
+    text: "{{ session('error') }}",
+    confirmButtonColor: '#1e2a78'
+});
+});
+</script>
+@endif
+
+@if(isset($cutiBelumAcc) && $cutiBelumAcc)
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     Swal.fire({
         icon: 'warning',
         title: 'Pengajuan Masih Aktif',
         text: 'Anda masih memiliki pengajuan cuti yang belum disetujui atau masih diproses.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'OK',
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "{{ url('/dashboard-karyawan') }}";
+        }
     });
 });
 </script>
@@ -385,7 +418,8 @@ function setLightMode() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    if (localStorage.getItem("sidebar") === "closed") {
+    const savedSidebarState = localStorage.getItem("sidebar");
+    if (savedSidebarState === "closed" || (!savedSidebarState && window.innerWidth < 1024)) {
         document.body.classList.add("sidebar-closed");
     }
 
@@ -396,13 +430,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+function resetInputsAndHitung() {
+    const sisaAwal = parseInt(document.getElementById("sisa_awal").value) || 0;
+    document.getElementById("tanggal_mulai").value = "";
+    document.getElementById("tanggal_selesai").value = "";
+    document.getElementById("jumlah_hari").value = "";
+    document.getElementById("sisa_sekarang").value = sisaAwal;
+    hitungCuti();
+}
+
 function hitungCuti() {
+
     const jenis = document.getElementById("id_jenis_cuti");
     const selected = jenis.options[jenis.selectedIndex];
 
-    if (!selected) return;
+    if (!selected || selected.value === "") return;
 
-    const jenisText = selected.text.toLowerCase();
 
     const sisaAwal = parseInt(document.getElementById("sisa_awal").value) || 0;
     const jumlahInput = document.getElementById("jumlah_hari");
@@ -411,39 +454,100 @@ function hitungCuti() {
     const tanggalSelesai = document.getElementById("tanggal_selesai");
     const fileMc = document.getElementById("file_mc_box");
 
+    if (tanggalMulai.value) {
+        tanggalSelesai.min = tanggalMulai.value;
+    } else {
+        tanggalSelesai.min = tanggalMulai.min || "";
+    }
+
+    const jenisText = selected.text.toLowerCase();
+
+
+    // ===============================
+    // H-7 KHUSUS CUTI TAHUNAN
+    // ===============================
+    if (jenisText.includes("tahunan")) {
+
+        setTanggalMinimalCuti();
+
+    } else {
+
+        tanggalMulai.removeAttribute("min");
+
+        document.getElementById("infoCuti").innerHTML =
+        "Pengajuan cuti ini tidak memiliki batas minimal hari pengajuan.";
+
+    }
+
+
     let jumlahHari = 0;
 
+
+    // CUTI MELAHIRKAN ISTRI
     if (jenisText.includes("melahirkan") && jenisText.includes("istri")) {
+
         jumlahHari = 90;
+
         jumlahInput.value = jumlahHari;
         jumlahInput.readOnly = true;
+
         sisaSekarang.value = sisaAwal;
-        tanggalSelesai.value = hitungTanggalSelesai(tanggalMulai.value, jumlahHari);
+
+        if (tanggalMulai.value) {
+            tanggalSelesai.value =
+            hitungTanggalSelesai(tanggalMulai.value, jumlahHari);
+        }
+
         fileMc.classList.add("hidden");
     }
 
+
+    // CUTI MELAHIRKAN SUAMI
     else if (jenisText.includes("melahirkan") && jenisText.includes("suami")) {
+
         jumlahHari = 2;
+
         jumlahInput.value = jumlahHari;
         jumlahInput.readOnly = true;
+
         sisaSekarang.value = sisaAwal;
-        tanggalSelesai.value = hitungTanggalSelesai(tanggalMulai.value, jumlahHari);
+
+        if (tanggalMulai.value) {
+            tanggalSelesai.value =
+            hitungTanggalSelesai(tanggalMulai.value, jumlahHari);
+        }
+
         fileMc.classList.add("hidden");
     }
 
+
+    // CUTI SAKIT
     else if (jenisText.includes("sakit")) {
+
         jumlahInput.readOnly = false;
-        sisaSekarang.value = sisaAwal;
-        tanggalSelesai.value = "";
         fileMc.classList.remove("hidden");
+
+        if (tanggalMulai.value && tanggalSelesai.value) {
+            hitungHari();
+        } else {
+            jumlahInput.value = "";
+            sisaSekarang.value = sisaAwal;
+        }
     }
 
+
+    // CUTI TAHUNAN
     else {
+
         jumlahInput.readOnly = false;
-        jumlahHari = parseInt(jumlahInput.value) || 0;
-        sisaSekarang.value = Math.max(0, sisaAwal - jumlahHari);
-        tanggalSelesai.value = "";
         fileMc.classList.add("hidden");
+
+        if (tanggalMulai.value && tanggalSelesai.value) {
+            hitungHari();
+        } else {
+            jumlahInput.value = "";
+            sisaSekarang.value = sisaAwal;
+        }
     }
 }
 
@@ -464,6 +568,7 @@ function hitungHari() {
     const mulai = document.getElementById("tanggal_mulai").value;
     const selesai = document.getElementById("tanggal_selesai").value;
     const sisaAwal = parseInt(document.getElementById("sisa_awal").value) || 0;
+    const tipeKerja = "{{ $user->tipe_kerja ?? '' }}";
 
     const jenis = document.getElementById("id_jenis_cuti");
     const jenisText = jenis.options[jenis.selectedIndex]?.text.toLowerCase() || "";
@@ -476,20 +581,66 @@ function hitungHari() {
         const start = new Date(mulai);
         const end = new Date(selesai);
 
-        const selisih = end - start;
-        const hari = Math.floor(selisih / (1000 * 60 * 60 * 24)) + 1;
-
-        if (hari > 0) {
-            document.getElementById("jumlah_hari").value = hari;
-
-            if (jenisText.includes("tahunan")) {
-                document.getElementById("sisa_sekarang").value = Math.max(0, sisaAwal - hari);
-            } else {
-                document.getElementById("sisa_sekarang").value = sisaAwal;
-            }
-        } else {
+        if (end < start) {
             alert("Tanggal selesai tidak boleh sebelum tanggal mulai");
             document.getElementById("jumlah_hari").value = "";
+            document.getElementById("sisa_sekarang").value = sisaAwal;
+            return;
+        }
+
+        const hariLibur = [
+            '2026-01-01',
+            '2026-03-19',
+            '2026-03-20',
+            '2026-04-03',
+            '2026-04-06',
+            '2026-05-01',
+            '2026-05-14',
+            '2026-05-27',
+            '2026-06-17',
+            '2026-08-17',
+            '2026-12-25'
+        ];
+
+        let hari = 0;
+        let loopDate = new Date(start);
+
+        while (loopDate <= end) {
+            const dayOfWeek = loopDate.getDay(); // 0 is Sunday, 6 is Saturday
+            
+            // Format to YYYY-MM-DD
+            const yyyy = loopDate.getFullYear();
+            const mm = String(loopDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(loopDate.getDate()).padStart(2, '0');
+            const dateString = `${yyyy}-${mm}-${dd}`;
+
+            let isHoliday = false;
+
+            // 1. Sunday is always holiday for all
+            if (dayOfWeek === 0) {
+                isHoliday = true;
+            }
+            // 2. Saturday is holiday for back office only
+            else if (tipeKerja === 'back_office' && dayOfWeek === 6) {
+                isHoliday = true;
+            }
+            // 3. National Holiday
+            else if (hariLibur.includes(dateString)) {
+                isHoliday = true;
+            }
+
+            if (!isHoliday) {
+                hari++;
+            }
+
+            loopDate.setDate(loopDate.getDate() + 1);
+        }
+
+        document.getElementById("jumlah_hari").value = hari;
+
+        if (jenisText.includes("tahunan")) {
+            document.getElementById("sisa_sekarang").value = Math.max(0, sisaAwal - hari);
+        } else {
             document.getElementById("sisa_sekarang").value = sisaAwal;
         }
     }
@@ -498,8 +649,14 @@ function hitungHari() {
 function hitungSisaCuti() {
     const sisaAwal = parseInt(document.getElementById("sisa_awal").value) || 0;
     const jumlah = parseInt(document.getElementById("jumlah_hari").value) || 0;
+    const jenis = document.getElementById("id_jenis_cuti");
+    const jenisText = jenis.options[jenis.selectedIndex]?.text.toLowerCase() || "";
 
-    document.getElementById("sisa_sekarang").value = Math.max(0, sisaAwal - jumlah);
+    if (jenisText.includes("tahunan")) {
+        document.getElementById("sisa_sekarang").value = Math.max(0, sisaAwal - jumlah);
+    } else {
+        document.getElementById("sisa_sekarang").value = sisaAwal;
+    }
 }
 
 function showLogoutModal(event) {
@@ -560,6 +717,70 @@ function validateCuti() {
     }
 
     return true; // lanjut submit
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const savedSidebarState = localStorage.getItem("sidebar");
+
+    if (savedSidebarState === "closed" || (!savedSidebarState && window.innerWidth < 1024)) {
+        document.body.classList.add("sidebar-closed");
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+        setDarkMode();
+    } else {
+        setLightMode();
+    }
+
+
+    // VALIDASI H-7 CUTI
+    setTanggalMinimalCuti();
+
+});
+
+function setTanggalMinimalCuti(){
+
+    const inputTanggal = document.getElementById("tanggal_mulai");
+    const info = document.getElementById("infoCuti");
+
+
+    let sekarang = new Date();
+
+
+    let minimalHari = {{ $pengaturan->minimal_pengajuan_hari ?? 7 }};
+
+
+    sekarang.setDate(
+        sekarang.getDate() + minimalHari
+    );
+
+
+    let tahun = sekarang.getFullYear();
+    let bulan = String(sekarang.getMonth()+1).padStart(2,'0');
+    let hari = String(sekarang.getDate()).padStart(2,'0');
+
+
+    let tanggalMinimal = `${tahun}-${bulan}-${hari}`;
+
+
+    inputTanggal.min = tanggalMinimal;
+    const inputSelesai = document.getElementById("tanggal_selesai");
+    if (inputSelesai) {
+        inputSelesai.min = tanggalMinimal;
+    }
+
+
+    let formatTanggal = new Date(tanggalMinimal)
+        .toLocaleDateString('id-ID',{
+            day:'numeric',
+            month:'long',
+            year:'numeric'
+        });
+
+
+    info.innerHTML = 
+    `Pengajuan cuti dapat dilakukan mulai tanggal <b>${formatTanggal}</b> (minimal <b>{{ $pengaturan->minimal_pengajuan_hari ?? 7 }}</b> hari sebelum cuti)`;
 }
 </script>
 

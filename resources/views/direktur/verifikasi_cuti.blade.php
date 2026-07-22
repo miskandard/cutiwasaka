@@ -19,19 +19,16 @@
 
     <style>
         .modal-content {
-            width: 850px;
-            height: 880px;
             background: #fff;
-            margin: 40px auto;
             border-radius: 20px;
-            padding: 35px;
+            padding: 25px;
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
             animation: modalFadeDown 0.3s ease forwards;
         }
 
         m-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
         }
 
@@ -455,6 +452,64 @@
                 transform: translateY(0);
             }
         }
+
+        @media (max-width: 1023.98px) {
+            .page-title {
+                font-size: 28px !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 22px !important;
+            }
+            .topbar {
+                padding: 15px 15px !important;
+            }
+            .card-body {
+                padding: 15px !important;
+            }
+        }
+
+        /* DARK MODE ADJUSTMENTS FOR BOOTSTRAP CARDS & TEXT */
+        body.dark-mode {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .card {
+            background-color: #111827 !important;
+            color: #f8fafc !important;
+            border-color: #1f2937 !important;
+        }
+        body.dark-mode .card .text-dark,
+        body.dark-mode .card h2,
+        body.dark-mode .card h4,
+        body.dark-mode .card h5 {
+            color: #f8fafc !important;
+        }
+        body.dark-mode .card .text-muted {
+            color: #94a3b8 !important;
+        }
+        body.dark-mode .welcome-box,
+        body.dark-mode .logout-box {
+            background-color: #111827 !important;
+            color: #f8fafc !important;
+            border: 1px solid #1f2937 !important;
+        }
+        body.dark-mode .welcome-box h2,
+        body.dark-mode .welcome-box p,
+        body.dark-mode .logout-box h2,
+        body.dark-mode .logout-box p {
+            color: #f8fafc !important;
+        }
+        body.dark-mode .welcome-box button,
+        body.dark-mode .btn-cancel {
+            background-color: #374151 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .table-light {
+            --bs-table-bg: #1f2937 !important;
+            --bs-table-color: #f8fafc !important;
+        }
     </style>
 </head>
 
@@ -483,14 +538,22 @@
         </a>
 
         <a href="#" class="logout" onclick="showLogoutModal(event)">
-    <i class="fa-solid fa-right-from-bracket"></i> Keluar
-</a>
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+        </a>
     </div>
+
+    <!-- Sidebar Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <div class="main-content">
 
-        <div div class="topbar d-flex justify-content-between align-items-center">
-            <h1 class="fw-bold text-primary-emphasis">Verifikasi Cuti</h1>
+        <div class="topbar px-4 py-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="hamburger-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="fw-bold text-primary-emphasis mb-0 fs-3">Verifikasi Cuti</h1>
+            </div>
 
             <div class="user-box d-flex align-items-center gap-3">
 
@@ -518,13 +581,13 @@
                 </div>
                 @endif
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="fw-bold text-primary-emphasis">Pengajuan Cuti</h4>
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
+                    <h4 class="fw-bold text-primary-emphasis mb-0">Pengajuan Cuti</h4>
 
-                    <input type="text" id="searchInput" class="form-control w-25" placeholder="Cari nama karyawan">
+                    <input type="text" id="searchInput" class="form-control" style="width: 100%; max-width: 250px;" placeholder="Cari nama karyawan">
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                     <table class="table table-hover align-middle" id="cutiTable">
                         <thead class="table-light">
                             <tr>
@@ -583,6 +646,66 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Card view on mobile screen -->
+                <div class="d-block d-md-none" id="riwayatCardContainer">
+                    @forelse($pengajuanCuti as $item)
+                        <div class="card border-0 shadow-sm rounded-3 p-4 mb-3 border-start border-4 @if($item->status_direktur == 'menunggu') border-warning @elseif($item->status_direktur == 'disetujui') border-success @elseif($item->status_direktur == 'ditolak') border-danger @endif">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-muted text-xs d-block mb-1">
+                                        #{{ $loop->iteration }} - {{ $item->divisi ?? '-' }}
+                                    </span>
+                                    <h4 class="fw-bold fs-5 text-dark mb-0">
+                                        {{ $item->nama ?? '-' }}
+                                    </h4>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis mt-1">
+                                        {{ $item->nama_jenis_cuti ?? 'Cuti' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    @if($item->status_direktur == 'menunggu')
+                                        <span class="status menunggu text-xs">Menunggu</span>
+                                    @elseif($item->status_direktur == 'disetujui')
+                                        <span class="status disetujui text-xs">Disetujui</span>
+                                    @elseif($item->status_direktur == 'ditolak')
+                                        <span class="status ditolak text-xs">Ditolak</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="row g-2 text-sm border-top border-bottom py-3 my-3">
+                                <div class="col-6">
+                                    <span class="text-muted d-block text-xs">MULAI</span>
+                                    <strong class="text-dark">{{ $item->tanggal_mulai }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block text-xs">SELESAI</span>
+                                    <strong class="text-dark">{{ $item->tanggal_selesai }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-primary w-100 py-2 flex items-center justify-center gap-2" data-bs-toggle="modal"
+                                    data-bs-target="#modalVerifikasi" data-id="{{ $item->id_pengajuan }}"
+                                    data-nama="{{ $item->nama ?? '-' }}"
+                                    data-jenis="{{ $item->nama_jenis_cuti ?? 'Cuti' }}"
+                                    data-jumlah="{{ $item->jumlah_hari ?? 0 }}"
+                                    data-sisa="{{ $item->sisa_cuti ?? 0 }}" data-mulai="{{ $item->tanggal_mulai }}"
+                                    data-selesai="{{ $item->tanggal_selesai }}"
+                                    data-alasan="{{ $item->alasan_pengajuan ?? '-' }}"
+                                    data-dokumen="{{ $item->dokumen_pendukung ? asset('storage/'.$item->dokumen_pendukung) : '' }}"
+                                    onclick="isiModal(this)">
+                                    <i class="fa-solid fa-eye"></i> Lihat & Verifikasi
+                                </button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                            Belum ada pengajuan cuti
+                        </div>
+                    @endforelse
                 </div>
 
             </div>
@@ -657,27 +780,51 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Alasan Ditolak</label>
-                            <input type="text" id="alasan_ditolak" name="alasan_ditolak" class="form-control"
-                                placeholder="Silahkan isi alasan jika cuti ditolak">
-                        </div>
+                        <div class="d-flex gap-4 mb-3">
 
-                        <div class="d-flex gap-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="status_pengajuan" value="disetujui"
-                                    required>
-                                <label class="form-check-label">Diterima</label>
-                            </div>
+    <div class="form-check">
+        <input
+            class="form-check-input"
+            type="radio"
+            name="status_pengajuan"
+            value="disetujui"
+            id="status_disetujui"
+            required
+            onclick="toggleAlasanDitolak()">
 
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="status_pengajuan" value="ditolak"
-                                    required>
-                                <label class="form-check-label">Ditolak</label>
-                            </div>
-                        </div>
-                    </div>
+        <label class="form-check-label" for="status_disetujui">
+            Diterima
+        </label>
+    </div>
 
+    <div class="form-check">
+        <input
+            class="form-check-input"
+            type="radio"
+            name="status_pengajuan"
+            value="ditolak"
+            id="status_ditolak"
+            required
+            onclick="toggleAlasanDitolak()">
+
+        <label class="form-check-label" for="status_ditolak">
+            Ditolak
+        </label>
+    </div>
+
+</div>
+
+<!-- Alasan Ditolak -->
+<div class="mb-3" id="box_alasan_ditolak" style="display: none;">
+    <label class="form-label fw-semibold">Alasan Ditolak</label>
+
+    <input
+        type="text"
+        id="alasan_ditolak"
+        name="alasan_ditolak"
+        class="form-control"
+        placeholder="Silakan isi alasan penolakan">
+</div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Tutup
@@ -725,8 +872,7 @@
         function isiModal(btn) {
             const form = document.getElementById("formVerifikasi");
 
-            form.action =
-"/verifikasi-cuti-direktur/update/" + btn.dataset.id;
+            form.action ="/verifikasi-cuti-direktur/update/" + btn.dataset.id;
 
             document.getElementById("modal_nama").value = btn.dataset.nama || "";
             document.getElementById("modal_jenis").value = btn.dataset.jenis || "";
@@ -757,12 +903,21 @@
         if (searchInput) {
             searchInput.addEventListener("keyup", function () {
                 const filter = this.value.toLowerCase();
+                
+                // Filter table rows
                 const rows = document.querySelectorAll("#cutiTable tbody tr");
-
                 rows.forEach(row => {
-    const nama = row.cells[1]?.textContent.toLowerCase() || "";
-    row.style.display = nama.includes(filter) ? "" : "none";
-});
+                    const nama = row.cells[1]?.textContent.toLowerCase() || "";
+                    row.style.display = nama.includes(filter) ? "" : "none";
+                });
+
+                // Filter mobile cards
+                const cards = document.querySelectorAll("#riwayatCardContainer .card");
+                cards.forEach(card => {
+                    const nameHeader = card.querySelector("h4");
+                    const nameText = nameHeader ? nameHeader.textContent.toLowerCase() : "";
+                    card.style.display = nameText.includes(filter) ? "" : "none";
+                });
             });
         }
 
@@ -794,7 +949,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            if (localStorage.getItem("sidebar") === "closed") {
+            const savedSidebarState = localStorage.getItem("sidebar");
+            if (savedSidebarState === "closed" || (!savedSidebarState && window.innerWidth < 1024)) {
                 document.body.classList.add("sidebar-closed");
             }
 
@@ -908,6 +1064,23 @@
                 alasanDitolak.value = '';
             });
         }
+
+    function toggleAlasanDitolak() {
+
+    const radioDitolak = document.getElementById("status_ditolak");
+    const boxAlasan = document.getElementById("box_alasan_ditolak");
+    const inputAlasan = document.getElementById("alasan_ditolak");
+
+    if (radioDitolak.checked) {
+        boxAlasan.style.display = "block";
+        inputAlasan.required = true;
+    } else {
+        boxAlasan.style.display = "none";
+        inputAlasan.required = false;
+        inputAlasan.value = "";
+    }
+
+}
     </script>
 
 </body>

@@ -12,13 +12,55 @@
 
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 
-    <!-- 🔥 FIX AUTOFILL CHROME -->
+    <!-- 🔥 FIX AUTOFILL CHROME & FUNCTIONAL WIDGET STYLES -->
     <style>
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus {
             -webkit-box-shadow: 0 0 0px 1000px white inset !important;
             -webkit-text-fill-color: #000 !important;
+        }
+
+        /* PASSWORD STRENGTH METER */
+        .strength-container {
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: left;
+        }
+        
+        .strength-meter {
+            height: 5px;
+            width: 100%;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.4s ease;
+            border-radius: 99px;
+        }
+
+        .strength-text {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            text-align: right;
+            display: block;
+        }
+
+        /* PASSWORD MATCH */
+        .match-indicator {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: left;
         }
     </style>
 </head>
@@ -60,7 +102,7 @@
                 <div class="alert-success">{{ session('success') }}</div>
             @endif
 
-            @if(session('error'))
+            @if(session('error') && session('error') != 'Email tidak ditemukan')
                 <div class="alert-error">{{ session('error') }}</div>
             @endif
 
@@ -84,8 +126,15 @@
                     <input type="email"
                            name="email"
                            placeholder="Masukkan Email"
+                           value="{{ old('email') }}"
                            autocomplete="off"
+                           style="{{ session('error') == 'Email tidak ditemukan' ? 'border-color: #ef4444; background: #fdf2f2;' : '' }}"
                            required>
+                    @if(session('error') == 'Email tidak ditemukan')
+                        <span style="color: #ef4444; font-size: 11.5px; font-weight: 600; display: block; margin-top: 5px; text-align: left;">
+                            ✗ Email ini tidak terdaftar di sistem
+                        </span>
+                    @endif
                 </div>
 
                 <!-- PASSWORD -->
@@ -156,6 +205,110 @@ function togglePassword(id, icon) {
         icon.classList.add("fa-eye");
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    const passwordInput = document.getElementById("password");
+    const confirmInput = document.getElementById("password_confirmation");
+
+    // Add elements for strength meter
+    const strengthContainer = document.createElement("div");
+    strengthContainer.className = "strength-container";
+    strengthContainer.innerHTML = `
+        <div class="strength-meter">
+            <div class="strength-bar"></div>
+        </div>
+        <span class="strength-text"></span>
+    `;
+    passwordInput.parentNode.after(strengthContainer);
+
+    const strengthBar = strengthContainer.querySelector(".strength-bar");
+    const strengthText = strengthContainer.querySelector(".strength-text");
+
+    // Add elements for match indicator
+    const matchIndicator = document.createElement("div");
+    matchIndicator.className = "match-indicator";
+    confirmInput.parentNode.after(matchIndicator);
+
+    // Password strength evaluator
+    passwordInput.addEventListener("input", function () {
+        const val = passwordInput.value;
+        if (!val) {
+            strengthContainer.style.display = "none";
+            return;
+        }
+
+        strengthContainer.style.display = "block";
+        let score = 0;
+        if (val.length >= 6) score++;
+        if (val.length >= 10) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+
+        let percentage = 0;
+        let color = "";
+        let text = "";
+
+        switch (score) {
+            case 0:
+            case 1:
+                percentage = 20;
+                color = "#ef4444"; // Red
+                text = "Sangat Lemah 🔴";
+                break;
+            case 2:
+                percentage = 40;
+                color = "#f97316"; // Orange
+                text = "Lemah 🟠";
+                break;
+            case 3:
+                percentage = 60;
+                color = "#eab308"; // Yellow
+                text = "Cukup Kuat 🟡";
+                break;
+            case 4:
+                percentage = 80;
+                color = "#3b82f6"; // Blue
+                text = "Kuat 🔵";
+                break;
+            case 5:
+                percentage = 100;
+                color = "#22c55e"; // Green
+                text = "Sangat Kuat 🟢";
+                break;
+        }
+
+        strengthBar.style.width = percentage + "%";
+        strengthBar.style.backgroundColor = color;
+        strengthText.innerText = text;
+        strengthText.style.color = color;
+        
+        checkMatch();
+    });
+
+    // Password matching validator
+    function checkMatch() {
+        const p1 = passwordInput.value;
+        const p2 = confirmInput.value;
+
+        if (!p2) {
+            matchIndicator.style.display = "none";
+            return;
+        }
+
+        matchIndicator.style.display = "block";
+
+        if (p1 === p2) {
+            matchIndicator.innerText = "✓ Password cocok";
+            matchIndicator.style.color = "#22c55e";
+        } else {
+            matchIndicator.innerText = "✗ Password tidak cocok";
+            matchIndicator.style.color = "#ef4444";
+        }
+    }
+
+    confirmInput.addEventListener("input", checkMatch);
+});
 </script>
 
 </body>

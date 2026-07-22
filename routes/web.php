@@ -12,7 +12,7 @@ use Google\Service\Gmail;
 
 /*
 |--------------------------------------------------------------------------
-| DEFAULT
+| HALAMAN LOGIN
 |--------------------------------------------------------------------------
 */
 
@@ -20,9 +20,11 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+Route::get('/verify-email/{token}', [AuthController::class, 'verifyEmail'])->name('verify.email');
+
 /*
 |--------------------------------------------------------------------------
-| AUTH
+| AUTENTIKASI
 |--------------------------------------------------------------------------
 */
 
@@ -33,7 +35,7 @@ Route::get('/logout', [AuthController::class, 'logout']);
 
 /*
 |--------------------------------------------------------------------------
-| RESET PASSWORD
+| RESET KATA SANDI
 |--------------------------------------------------------------------------
 */
 
@@ -56,6 +58,8 @@ Route::get('/hrd/riwayat-cuti-hrd', [HRDController::class, 'riwayatCutiHRD']);
 Route::get('/list-karyawan', [HRDController::class, 'listKaryawan']);
 Route::post('/karyawan/store', [HRDController::class, 'storeKaryawan']);
 Route::post('/karyawan/update/{id}', [HRDController::class, 'updateKaryawan']);
+Route::post('/karyawan/import', [HRDController::class, 'importKaryawan']);
+Route::get('/karyawan/resend-verification/{id}', [HRDController::class, 'resendVerification']);
 Route::get('/karyawan/delete/{id}', [HRDController::class, 'deleteKaryawan']);
 
 Route::post('/cuti-bersama/store', [HRDController::class, 'cutiBersama']);
@@ -64,6 +68,9 @@ Route::get('/data-cuti', [HRDController::class, 'dataCuti']);
 
 Route::get('/verifikasi-cuti', [HRDController::class, 'verifikasiCuti']);
 Route::post('/verifikasi-cuti/update/{id}', [HRDController::class, 'updateVerifikasiCuti']);
+
+Route::get('/pengaturan-cuti', [HRDController::class, 'pengaturanCuti']);
+Route::post('/pengaturan-cuti/update', [HRDController::class, 'updatePengaturanCuti']);
 
 /*
 |--------------------------------------------------------------------------
@@ -78,7 +85,7 @@ Route::get('/riwayat-cuti', [KaryawanController::class, 'riwayatCuti']);
 
 /*
 |--------------------------------------------------------------------------
-| DIREKTUR (FIXED + STABIL)
+| DIREKTUR
 |--------------------------------------------------------------------------
 */
 
@@ -89,6 +96,8 @@ Route::get('/verifikasi-cuti-direktur', [DirekturController::class, 'verifikasiC
 Route::post('/verifikasi-cuti-direktur/update/{id}', [DirekturController::class, 'updateVerifikasiCuti']);
 
 Route::get('/data-cuti-direktur', [DirekturController::class, 'dataCuti']);
+
+
 /*
 |--------------------------------------------------------------------------
 | GMAIL OAUTH
@@ -134,19 +143,4 @@ Route::get('/gmail/callback', function () {
     return '<h2>Gmail berhasil terhubung ✅</h2>';
 });
 
-/*
-|--------------------------------------------------------------------------
-| TEST EMAIL
-|--------------------------------------------------------------------------
-*/
 
-Route::get('/gmail/test-service', function () {
-
-    GmailService::send(
-        'emailtujuan@gmail.com',
-        'Tes Gmail Service',
-        'Ini tes kirim email dari GmailService Cuti Wasaka.'
-    );
-
-    return 'Email berhasil dikirim ✅';
-});

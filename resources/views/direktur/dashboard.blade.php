@@ -75,6 +75,8 @@
             padding: 30px;
             border-radius: 20px;
             text-align: center;
+            width: 90%;
+            max-width: 430px;
         }
 
         .check-icon {
@@ -203,7 +205,8 @@
         }
 
         .logout-box {
-            width: 430px;
+            width: 90%;
+            max-width: 430px;
             background: #fff;
 
             border-radius: 12px;
@@ -353,6 +356,61 @@
             font-size: 42px;
             font-weight: 800;
         }
+
+        @media (max-width: 1023.98px) {
+            .page-title {
+                font-size: 28px !important;
+            }
+        }
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 22px !important;
+            }
+            .topbar {
+                padding: 15px 15px !important;
+            }
+        }
+
+        /* DARK MODE ADJUSTMENTS FOR BOOTSTRAP CARDS & TEXT */
+        body.dark-mode {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .card {
+            background-color: #111827 !important;
+            color: #f8fafc !important;
+            border-color: #1f2937 !important;
+        }
+        body.dark-mode .card .text-dark,
+        body.dark-mode .card h2,
+        body.dark-mode .card h4,
+        body.dark-mode .card h5 {
+            color: #f8fafc !important;
+        }
+        body.dark-mode .card .text-muted {
+            color: #94a3b8 !important;
+        }
+        body.dark-mode .welcome-box,
+        body.dark-mode .logout-box {
+            background-color: #111827 !important;
+            color: #f8fafc !important;
+            border: 1px solid #1f2937 !important;
+        }
+        body.dark-mode .welcome-box h2,
+        body.dark-mode .welcome-box p,
+        body.dark-mode .logout-box h2,
+        body.dark-mode .logout-box p {
+            color: #f8fafc !important;
+        }
+        body.dark-mode .welcome-box button,
+        body.dark-mode .btn-cancel {
+            background-color: #374151 !important;
+            color: #f8fafc !important;
+        }
+        body.dark-mode .table-light {
+            --bs-table-bg: #1f2937 !important;
+            --bs-table-color: #f8fafc !important;
+        }
     </style>
 </head>
 
@@ -385,17 +443,24 @@
         </a>
     </div>
 
+    <!-- Sidebar Overlay for mobile -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
     <div class="main-content">
 
-        <div class="topbar">
+        <div class="topbar px-4 py-3">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="hamburger-btn" onclick="toggleSidebar()">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="fw-bold page-title mb-0">
+                    Beranda
+                </h1>
+            </div>
 
-            <h1 class="fw-bold page-title">
-                Beranda
-            </h1>
+            <div class="topbar-right gap-2 gap-sm-3">
 
-            <div class="topbar-right">
-
-                <div class="theme-toggle-top">
+                <div class="theme-toggle-top scale-90 sm:scale-100">
                     <button type="button" id="lightBtn" onclick="setLightMode()">
                         <i class="fa-solid fa-sun"></i>
                     </button>
@@ -406,7 +471,7 @@
                 </div>
 
                 <div class="user-box">
-                    <strong>{{ session('nama') }}</strong>
+                    <strong class="d-none d-sm-inline">{{ session('nama') }}</strong>
                     <i class="fa-solid fa-user"></i>
                 </div>
 
@@ -510,7 +575,7 @@
 
                 </div>
 
-                <div class="table-responsive">
+                <div class="table-responsive d-none d-md-block">
                     <table class="table align-middle" id="dataTable">
                         <thead class="table-light">
                             <tr>
@@ -558,6 +623,57 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Card view on mobile screen -->
+                <div class="d-block d-md-none" id="riwayatCardContainer">
+                    @forelse($pengajuan as $item)
+                        <div class="card border-0 shadow-sm rounded-3 p-4 mb-3 border-start border-4 @if($item->status_direktur == 'menunggu') border-warning @elseif($item->status_direktur == 'disetujui') border-success @elseif($item->status_direktur == 'ditolak') border-danger @endif">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="text-muted text-xs d-block mb-1">
+                                        #{{ $loop->iteration }} - {{ $item->divisi ?? '-' }}
+                                    </span>
+                                    <h4 class="fw-bold fs-5 text-dark mb-0">
+                                        {{ $item->nama }}
+                                    </h4>
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis mt-1">
+                                        {{ $item->nama_jenis_cuti ?? 'Cuti' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    @if($item->status_direktur == 'menunggu')
+                                        <span class="status menunggu">Menunggu</span>
+                                    @elseif($item->status_direktur == 'disetujui')
+                                        <span class="status disetujui">Disetujui</span>
+                                    @elseif($item->status_direktur == 'ditolak')
+                                        <span class="status ditolak">Ditolak</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="row g-2 text-sm border-top border-bottom py-3 my-3">
+                                <div class="col-6">
+                                    <span class="text-muted d-block text-xs">MULAI</span>
+                                    <strong class="text-dark">{{ $item->tanggal_mulai }}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block text-xs">SELESAI</span>
+                                    <strong class="text-dark">{{ $item->tanggal_selesai }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <a href="/verifikasi-cuti-direktur" class="btn-lihat w-100 text-center py-2">
+                                    <i class="fa-solid fa-eye me-1"></i> Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5 text-muted bg-light rounded-3 border border-dashed">
+                            Belum ada pengajuan cuti
+                        </div>
+                    @endforelse
                 </div>
 
             </div>
@@ -621,7 +737,8 @@
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            if (localStorage.getItem("sidebar") === "closed") {
+            const savedSidebarState = localStorage.getItem("sidebar");
+            if (savedSidebarState === "closed" || (!savedSidebarState && window.innerWidth < 1024)) {
                 document.body.classList.add("sidebar-closed");
             }
         });

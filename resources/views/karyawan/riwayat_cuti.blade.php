@@ -64,11 +64,13 @@
             color: #0d1f6b;
             padding: 13px;
             text-align: left;
+            white-space: nowrap;
         }
 
         td {
             padding: 13px;
             border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
         }
 
         .status {
@@ -265,7 +267,8 @@
         }
 
         .logout-box {
-            width: 420px;
+            width: 90%;
+            max-width: 420px;
             background: #fff;
             border-radius: 12px;
             padding: 35px;
@@ -410,13 +413,82 @@
 
 
         .status.diproses {
-    background: #e0e0e0;
-    color: #333;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    display: inline-block;
-}
+            background: #e0e0e0;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        @media (max-width: 1023.98px) {
+            .detail-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            .full {
+                grid-column: span 1 !important;
+            }
+            .timeline-wrapper {
+                flex-direction: column !important;
+                gap: 5px !important;
+            }
+            .timeline-line {
+                width: 3px !important;
+                height: 30px !important;
+                margin: 5px auto !important;
+            }
+            .timeline-step {
+                min-width: auto !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .table-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 15px !important;
+            }
+            .search-box {
+                width: 100% !important;
+            }
+            .search-box input {
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .table-box {
+                padding: 10px !important;
+                box-shadow: none !important;
+                background: transparent !important;
+                border: none !important;
+            }
+            body.dark-mode .table-box {
+                background: transparent !important;
+                border: none !important;
+            }
+            .table-header h2 {
+                font-size: 20px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            /* Mobile Cards Styles */
+            .riwayat-card {
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+                border: 1px solid #eef2f6;
+                margin-bottom: 15px;
+                transition: all 0.25s ease;
+                background: white;
+            }
+            body.dark-mode .riwayat-card {
+                background: #111827 !important;
+                border-color: #1f2937 !important;
+            }
+            .riwayat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            }
+        }
     </style>
 </head>
 
@@ -449,13 +521,21 @@
     </a>
 </div>
 
+<!-- Sidebar Overlay for mobile -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
 <div class="main-content">
 
-    <div class="topbar d-flex justify-content-between align-items-center">
-        <h1 class="fw-bold font-bold text-primary-emphasis">Riwayat Cuti</h1>
+    <div class="topbar d-flex justify-content-between align-items-center px-4 py-3">
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="lg:hidden text-2xl text-[#0d1f6b] hover:text-blue-900 border-none bg-transparent cursor-pointer p-0" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <h1 class="fw-bold font-bold text-primary-emphasis mb-0 fs-3">Riwayat Cuti</h1>
+        </div>
 
         <div class="user-box d-flex align-items-center gap-3">
-            <div class="theme-toggle-top">
+            <div class="theme-toggle-top scale-90 sm:scale-100">
                 <button type="button" id="lightBtn" onclick="setLightMode()">
                     <i class="fa-solid fa-sun"></i>
                 </button>
@@ -465,15 +545,12 @@
                 </button>
             </div>
 
-            <span class="font-semibold">{{ session('nama') }}</span>
+            <span class="font-semibold hidden sm:inline-block">{{ session('nama') }}</span>
             <i class="fa-solid fa-user"></i>
         </div>
     </div>
 
-    <div class="welcome-bar">
-        <span>Selamat Datang, {{ session('nama') }}</span>
-        <i class="fa-solid fa-xmark"></i>
-    </div>
+    
 
     <div class="table-box">
         <div class="table-header">
@@ -484,76 +561,153 @@
             </div>
         </div>
 
-        <table id="riwayatTable">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Jenis Cuti</th>
-                    <th>Tanggal Pengajuan</th>
-                    <th>Tanggal Mulai</th>
-                    <th>Tanggal Selesai</th>
-                    <th>Jumlah Hari</th>
-                    <th>Keterangan</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @forelse($riwayatCuti as $cuti)
+        <div class="overflow-x-auto hidden md:block">
+            <table id="riwayatTable">
+                <thead>
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
-                        <td>{{ $cuti->tanggal_pengajuan }}</td>
-                        <td>{{ $cuti->tanggal_mulai }}</td>
-                        <td>{{ $cuti->tanggal_selesai }}</td>
-                        <td>{{ $cuti->jumlah_hari }}</td>
-                        <td>{{ $cuti->alasan_pengajuan }}</td>
-
-                        <td>
-    @if($cuti->status_pengajuan == 'menunggu')
-        <span class="status menunggu">Menunggu</span>
-
-    @elseif($cuti->status_hrd == 'disetujui' && $cuti->status_direktur == 'menunggu')
-        <span class="status diproses">Diproses</span>
-
-    @elseif($cuti->status_pengajuan == 'disetujui')
-        <span class="status disetujui">Disetujui</span>
-
-    @elseif($cuti->status_pengajuan == 'ditolak')
-        <span class="status ditolak">Ditolak</span>
-    @endif
-</td>
-
-                        <td>
-                            <button
-                                type="button"
-                                class="btn-detail"
-                                data-jenis="{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}"
-                                data-pengajuan="{{ $cuti->tanggal_pengajuan }}"
-                                data-mulai="{{ $cuti->tanggal_mulai }}"
-                                data-selesai="{{ $cuti->tanggal_selesai }}"
-                                data-jumlah="{{ $cuti->jumlah_hari }}"
-                                data-keterangan="{{ $cuti->alasan_pengajuan }}"
-                                data-status="{{ $cuti->status_pengajuan }}"
-                                data-hrd="{{ $cuti->status_hrd ?? (($cuti->status_pengajuan == 'diproses' || $cuti->status_pengajuan == 'disetujui') ? 'disetujui' : 'menunggu') }}"
-                                data-direktur="{{ $cuti->status_direktur ?? ($cuti->status_pengajuan == 'disetujui' ? 'disetujui' : 'menunggu') }}"
-                                data-alasan-ditolak="{{ $cuti->alasan_ditolak ?? '' }}"
-                                onclick="openDetailFromButton(this)"
-                            >
-                                Detail
-                            </button>
-                        </td>
+                        <th>No</th>
+                        <th>Jenis Cuti</th>
+                        <th>Tanggal Pengajuan</th>
+                        <th>Tanggal Mulai</th>
+                        <th>Tanggal Selesai</th>
+                        <th>Jumlah Hari</th>
+                        <th>Keterangan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" style="text-align:center;">
-                            Belum ada riwayat cuti
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    @forelse($riwayatCuti as $cuti)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}</td>
+                            <td>{{ $cuti->tanggal_pengajuan }}</td>
+                            <td>{{ $cuti->tanggal_mulai }}</td>
+                            <td>{{ $cuti->tanggal_selesai }}</td>
+                            <td>{{ $cuti->jumlah_hari }}</td>
+                            <td>{{ $cuti->alasan_pengajuan }}</td>
+
+                            <td>
+        @if($cuti->status_pengajuan == 'menunggu')
+            <span class="status menunggu">Menunggu</span>
+
+        @elseif($cuti->status_hrd == 'disetujui' && $cuti->status_direktur == 'menunggu')
+            <span class="status diproses">Diproses</span>
+
+        @elseif($cuti->status_pengajuan == 'disetujui')
+            <span class="status disetujui">Disetujui</span>
+
+        @elseif($cuti->status_pengajuan == 'ditolak')
+            <span class="status ditolak">Ditolak</span>
+        @endif
+    </td>
+
+                            <td>
+                                <button
+                                    type="button"
+                                    class="btn-detail"
+                                    data-jenis="{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}"
+                                    data-pengajuan="{{ $cuti->tanggal_pengajuan }}"
+                                    data-mulai="{{ $cuti->tanggal_mulai }}"
+                                    data-selesai="{{ $cuti->tanggal_selesai }}"
+                                    data-jumlah="{{ $cuti->jumlah_hari }}"
+                                    data-keterangan="{{ $cuti->alasan_pengajuan }}"
+                                    data-status="{{ $cuti->status_pengajuan }}"
+                                    data-hrd="{{ $cuti->status_hrd ?? (($cuti->status_pengajuan == 'diproses' || $cuti->status_pengajuan == 'disetujui') ? 'disetujui' : 'menunggu') }}"
+                                    data-direktur="{{ $cuti->status_direktur ?? ($cuti->status_pengajuan == 'disetujui' ? 'disetujui' : 'menunggu') }}"
+                                    data-alasan-ditolak="{{ $cuti->alasan_ditolak ?? '' }}"
+                                    onclick="openDetailFromButton(this)"
+                                >
+                                    Detail
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="9" style="text-align:center;">
+                                Belum ada riwayat cuti
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Card view on mobile screen -->
+        <div class="block md:hidden space-y-4 mt-2" id="riwayatCardContainer">
+            @forelse($riwayatCuti as $cuti)
+                <div class="riwayat-card p-5 transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs text-gray-400 font-semibold block mb-1">
+                                #{{ $loop->iteration }} - {{ $cuti->tanggal_pengajuan }}
+                            </span>
+                            <h4 class="font-bold text-lg text-[#0d1f6b] dark:text-white">
+                                {{ $cuti->nama_jenis_cuti ?? 'Cuti' }}
+                            </h4>
+                        </div>
+                        <div>
+                            @if($cuti->status_pengajuan == 'menunggu')
+                                <span class="status menunggu text-xs">Menunggu</span>
+                            @elseif($cuti->status_hrd == 'disetujui' && $cuti->status_direktur == 'menunggu')
+                                <span class="status diproses text-xs">Diproses</span>
+                            @elseif($cuti->status_pengajuan == 'disetujui')
+                                <span class="status disetujui text-xs">Disetujui</span>
+                            @elseif($cuti->status_pengajuan == 'ditolak')
+                                <span class="status ditolak text-xs">Ditolak</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-sm border-t border-b border-gray-100 dark:border-gray-800 py-3 my-3">
+                        <div>
+                            <span class="text-gray-400 block text-xs">TANGGAL MULAI</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">{{ $cuti->tanggal_mulai }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 block text-xs">TANGGAL SELESAI</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">{{ $cuti->tanggal_selesai }}</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-gray-400 block text-xs">JUMLAH HARI</span>
+                            <span class="font-semibold text-gray-700 dark:text-gray-200">{{ $cuti->jumlah_hari }} Hari</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="text-gray-400 block text-xs mb-1">KETERANGAN</span>
+                        <p class="text-gray-700 dark:text-gray-300 text-sm italic">
+                            "{{ $cuti->alasan_pengajuan ?? '-' }}"
+                        </p>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button
+                            type="button"
+                            class="btn-detail w-full text-center py-2.5 flex items-center justify-center gap-2"
+                            data-jenis="{{ $cuti->nama_jenis_cuti ?? 'Cuti' }}"
+                            data-pengajuan="{{ $cuti->tanggal_pengajuan }}"
+                            data-mulai="{{ $cuti->tanggal_mulai }}"
+                            data-selesai="{{ $cuti->tanggal_selesai }}"
+                            data-jumlah="{{ $cuti->jumlah_hari }}"
+                            data-keterangan="{{ $cuti->alasan_pengajuan }}"
+                            data-status="{{ $cuti->status_pengajuan }}"
+                            data-hrd="{{ $cuti->status_hrd ?? (($cuti->status_pengajuan == 'diproses' || $cuti->status_pengajuan == 'disetujui') ? 'disetujui' : 'menunggu') }}"
+                            data-direktur="{{ $cuti->status_direktur ?? ($cuti->status_pengajuan == 'disetujui' ? 'disetujui' : 'menunggu') }}"
+                            data-alasan-ditolak="{{ $cuti->alasan_ditolak ?? '' }}"
+                            onclick="openDetailFromButton(this)"
+                        >
+                            <i class="fa-solid fa-circle-info"></i> Detail Pengajuan
+                        </button>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white dark:bg-[#111827] text-center py-8 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
+                    <p class="text-gray-500">Belum ada riwayat cuti</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 </div>
 
@@ -669,10 +823,17 @@ function initSearch() {
 
     searchInput.addEventListener("keyup", function () {
         const filter = this.value.toLowerCase();
+        
+        // Filter table rows
         const rows = document.querySelectorAll("#riwayatTable tbody tr");
-
         rows.forEach(function (row) {
             row.style.display = row.textContent.toLowerCase().includes(filter) ? "" : "none";
+        });
+
+        // Filter mobile cards
+        const cards = document.querySelectorAll("#riwayatCardContainer .riwayat-card");
+        cards.forEach(function (card) {
+            card.style.display = card.textContent.toLowerCase().includes(filter) ? "" : "none";
         });
     });
 }
@@ -688,7 +849,8 @@ function initTheme() {
 }
 
 function initSidebar() {
-    if (localStorage.getItem("sidebar") === "closed") {
+    const savedSidebarState = localStorage.getItem("sidebar");
+    if (savedSidebarState === "closed" || (!savedSidebarState && window.innerWidth < 1024)) {
         document.body.classList.add("sidebar-closed");
     }
 }

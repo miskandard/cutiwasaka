@@ -44,6 +44,18 @@ class AuthController extends Controller
         return back()->with('error', 'Pilihlah sesuai dengan jabatan anda');
     }
 
+    // 🔥 VALIDASI STATUS AKTIF / VERIFIKASI EMAIL
+    if (is_null($user->email_verified_at)) {
+        return back()->with('error', 'Akun Anda belum aktif. Silakan lakukan verifikasi melalui tautan yang dikirimkan ke email Anda.');
+    }
+
+    // Bersihkan token verifikasi setelah login sukses pertama kali
+    if (!is_null($user->verification_token)) {
+        DB::table('users')
+            ->where('id_user', $user->id_user)
+            ->update(['verification_token' => null]);
+    }
+
     session([
         'id_user'  => $user->id_user,
         'nama'     => $user->nama,
@@ -59,6 +71,34 @@ class AuthController extends Controller
         default    => redirect('/login')
     };
 }
+
+    // =========================
+    // VERIFY EMAIL PROCESS
+    // =========================
+    public function verifyEmail($token)
+    {
+        $user = DB::table('users')
+            ->where('verification_token', $token)
+            ->first();
+
+        if (!$user) {
+            return redirect('/login')->with('error', 'Tautan verifikasi tidak valid atau kedaluwarsa.');
+        }
+
+        // Jika sudah terverifikasi sebelumnya (misal ter-click oleh sistem/bot prefetch atau double click)
+        if ($user->email_verified_at !== null) {
+            return redirect('/login')->with('success', 'Akun Anda sudah aktif sebelumnya! Silakan login.');
+        }
+
+        DB::table('users')
+            ->where('id_user', $user->id_user)
+            ->update([
+                'email_verified_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        return redirect('/login')->with('success', 'Akun Anda berhasil diaktifkan! Silakan login.');
+    }
 
     // =========================
     // SHOW RESET FORM
@@ -85,7 +125,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$user) {
-            return back()->with('error', 'Email tidak ditemukan');
+            return back()->withInput()->with('error', 'Email tidak ditemukan');
         }
 
         DB::table('users')

@@ -67,6 +67,112 @@
 body.sidebar-closed .menu-title {
     display: none;
 }
+
+        /* Mobile and Tablet Responsiveness overrides */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed !important;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 250px !important;
+                z-index: 1050;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            body:not(.sidebar-closed) .sidebar {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 15px !important;
+                min-height: auto !important;
+            }
+
+            body.sidebar-closed .main-content {
+                margin-left: 0 !important;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: 1040;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                backdrop-filter: blur(4px);
+            }
+
+            body:not(.sidebar-closed) .sidebar-overlay {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .sidebar .logo img.logo-full {
+                display: inline-block !important;
+                width: 150px;
+            }
+
+            .sidebar .logo img.logo-mini {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .main-content {
+                padding: 12px !important;
+            }
+            .topbar {
+                padding: 15px !important;
+            }
+            .welcome-bar {
+                padding: 10px 15px !important;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .topbar h1 {
+                font-size: 24px !important;
+            }
+        }
+
+        .sidebar-mobile-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #e8ecff;
+            color: #1e2a78;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-mobile-toggle:hover {
+            background: #1e2a78;
+            color: white;
+        }
+
+        body.dark-mode .sidebar-mobile-toggle {
+            background: #1f2937;
+            color: white;
+        }
+
+        body.dark-mode .sidebar-mobile-toggle:hover {
+            background: #374151;
+        }
+
+        /* Responsive Modal Fixes */
+        .welcome-box, .logout-box {
+            width: 90% !important;
+            max-width: 420px !important;
+        }
     </style>
 </head>
 
@@ -121,36 +227,48 @@ body.sidebar-closed .menu-title {
         </a>
     </div>
 
+
+    <!-- SECTION 4 -->
+    <div class="menu-section">
+        <p class="menu-title">PENGATURAN</p>
+
+        <a href="/pengaturan-cuti">
+            <i class="fa-solid fa-gear"></i> Pengaturan Cuti
+        </a>
+    </div>
     <a href="javascript:void(0)" class="logout" onclick="showLogoutModal(event)">
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
     </a>
 
 </div>
 
-</div>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
- <div class="main-content">
+<div class="main-content">
 
-    <div div class="topbar d-flex justify-content-between align-items-center">
-    <h1 class="fw-bold text-primary-emphasis">Beranda</h1>
-
-    <div class="user-box d-flex align-items-center gap-3">
-
-        <div class="theme-toggle-top">
-            <button type="button" id="lightBtn" onclick="setLightMode()">
-                <i class="fa-solid fa-sun"></i>
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-3">
+            <button type="button" class="sidebar-mobile-toggle d-lg-none" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
             </button>
-
-            <button type="button" id="darkBtn" onclick="setDarkMode()">
-                <i class="fa-solid fa-moon"></i>
-            </button>
+            <h1 class="fw-bold text-primary-emphasis page-title mb-0">Beranda</h1>
         </div>
 
-        <span>{{ session('nama') }}</span>
-        <i class="fa-solid fa-user"></i>
-    </div>
+        <div class="user-box d-flex align-items-center gap-3">
+            <div class="theme-toggle-top">
+                <button type="button" id="lightBtn" onclick="setLightMode()">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
 
-</div>
+                <button type="button" id="darkBtn" onclick="setDarkMode()">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+
+            <span class="d-none d-sm-inline">{{ session('nama') }}</span>
+            <i class="fa-solid fa-user"></i>
+        </div>
+    </div>
     <div class="welcome-bar alert alert-light d-flex justify-content-between align-items-center mt-3 shadow-sm">
         <span>Selamat Datang, {{ session('nama') }}</span>
         <i class="fa-solid fa-xmark" id="closeWelcome" style="cursor:pointer;"></i>
@@ -423,6 +541,7 @@ function toggleSidebar() {
 document.addEventListener("DOMContentLoaded", function () {
     const theme = localStorage.getItem("theme");
     const sidebarState = localStorage.getItem("sidebar");
+    const isMobile = window.innerWidth < 992;
 
     if (theme === "dark") {
         setDarkMode();
@@ -430,8 +549,10 @@ document.addEventListener("DOMContentLoaded", function () {
         setLightMode();
     }
 
-    if (sidebarState === "closed") {
+    if (sidebarState === "closed" || (isMobile && sidebarState === null)) {
         document.body.classList.add("sidebar-closed");
+    } else if (sidebarState === "open") {
+        document.body.classList.remove("sidebar-closed");
     }
 
     const closeWelcome = document.getElementById("closeWelcome");

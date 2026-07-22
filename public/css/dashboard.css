@@ -827,3 +827,206 @@ body.dark-mode .sidebar{
 .border-danger {
     border-color: #ef4444 !important;
 }
+
+.hamburger-btn {
+    display: none;
+}
+
+/* ==========================================
+   RESPONSIVENESS (MOBILE & TABLET)
+   ========================================== */
+@media (max-width: 1023.98px) {
+    .sidebar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        width: 260px !important;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease, transform 0.3s ease;
+    }
+
+    body.sidebar-closed .sidebar {
+        left: -260px !important;
+        width: 260px !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px !important;
+    }
+
+    body.sidebar-closed .main-content {
+        margin-left: 0 !important;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+    }
+
+    body:not(.sidebar-closed) .sidebar-overlay {
+        display: block;
+    }
+
+    /* Disable the 70px minimized states on mobile completely */
+    body.sidebar-closed .sidebar .logo-full {
+        display: block !important;
+    }
+    body.sidebar-closed .sidebar .logo-mini {
+        display: none !important;
+    }
+    body.sidebar-closed .sidebar a {
+        font-size: 16px !important;
+        justify-content: flex-start !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        padding-left: 25px !important;
+    }
+    body.sidebar-closed .sidebar a i {
+        font-size: 18px !important;
+        margin-right: 0 !important;
+    }
+    
+    .topbar {
+        padding: 15px 20px !important;
+    }
+    
+    .topbar h1 {
+        font-size: 24px !important;
+    }
+
+    /* Keep the modals responsive */
+    .welcome-box,
+    .logout-box {
+        width: 90% !important;
+        max-width: 420px !important;
+        padding: 24px !important;
+    }
+
+    .hamburger-btn {
+        display: inline-flex !important;
+        font-size: 26px !important;
+        color: #1e2a78 !important;
+        cursor: pointer !important;
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    body.dark-mode .hamburger-btn {
+        color: #ffffff !important;
+    }
+}
+
+/* ==========================================
+   SUPER NARROW DEVICES (width < 320px, down to 240px)
+   ========================================== */
+@media (max-width: 320px) {
+    /* Scale sidebar width dynamically */
+    .sidebar {
+        width: 100vw !important;
+        max-width: 100% !important;
+    }
+
+    body.sidebar-closed .sidebar {
+        left: -100vw !important;
+    }
+
+    /* Wrap topbar components to avoid horizontal overflow */
+    .topbar {
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 12px 10px !important;
+    }
+
+    .topbar > div:first-child {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 8px !important;
+    }
+
+    .topbar-right {
+        width: 100% !important;
+        justify-content: center !important;
+        gap: 10px !important;
+    }
+
+    /* Keep page title clean */
+    .topbar h1,
+    .page-title {
+        font-size: 18px !important;
+    }
+
+    /* Spacing inside cards and metrics */
+    .card,
+    .card-body,
+    .table-box {
+        padding: 12px !important;
+    }
+
+    /* Align columns vertically inside mobile lists */
+    .card .d-flex.justify-content-between {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+    }
+
+    /* Scale date columns inside cards */
+    .row.g-2.text-sm {
+        font-size: 11px !important;
+    }
+
+    /* Stacking modal items to fit 245px width */
+    .welcome-box,
+    .logout-box {
+        padding: 16px !important;
+        width: 95% !important;
+    }
+
+    .logout-buttons {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+    }
+
+    .logout-buttons a,
+    .logout-buttons button {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10px 15px !important;
+    }
+
+    /* Adjust bootstrap grid metrics padding */
+    .col-md-4 {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    /* Modal adjustments for small screen widths */
+    .modal-body .d-flex.gap-4 {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    .modal-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+
+    .modal-footer button,
+    .modal-footer a {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+}
